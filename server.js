@@ -1,13 +1,22 @@
 require('dotenv').config()
 // const mongodb = require('./db/connect')
 const express = require('express')
-// const cors = require('cors')
+const mongoose = require('mongoose')
+const cors = require('cors')
 // const contactsRouter = require('./routes/contacts')
 // const swaggerUi = require('swagger-ui-express')
 // const swaggerDocument = require('./swagger.json')
 // const swaggerDevDocument = require('./swagger-dev.json')
 
 const app = express()
+
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+const db = mongoose.connection
+db.on('error', console.error.bind(console, 'MongoDB connection error:'))
+
 const port = process.env.PORT || 8080
 
 app.use(cors())
@@ -22,7 +31,6 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
   next()
 })
-app.use('/contacts', contactsRouter)
 // app.use(
 //   '/api-docs',
 //   swaggerUi.serve,
@@ -30,3 +38,26 @@ app.use('/contacts', contactsRouter)
 //     process.env.NODE_ENV === 'dev' ? swaggerDevDocument : swaggerDocument
 //   )
 // )
+const Team = require('./models/team')
+
+app.get('/', async (req, res) => {
+  // const newTeam = await Team.create({
+  //   name: 'Team 1',
+  //   members: [],
+  //   projects: [],
+  // })
+  // res.status(201).json({ team: newTeam })
+
+  const newTeam = new Team({ name: 'Team 1', members: [], projects: [] })
+  newTeam.save((err, team) => {
+    if (err) {
+      res.status(500).json({ message: 'Error creating team' })
+    }
+
+    res.status(201).json({ message: 'Team created', team })
+  })
+})
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`)
+})
