@@ -1,0 +1,612 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a Project Management API",
+    "version": "1.0.0",
+    "title": "Project Management"
+  },
+  "host": "localhost:8080",
+  "tags": [
+    {
+      "name": "user"
+    },
+    {
+      "name": "team",
+      "description": "A group of users that manage projects"
+    },
+    {
+      "name": "project",
+      "description": "A project with a collection of tasks"
+    },
+    {
+      "name": "task",
+      "description": "A single task belonging to a project"
+    }
+  ],
+  "schemes": ["http"],
+  "paths": {
+    "/login": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Log in using Auth0",
+        "description": "",
+        "operationId": "login",
+        "responses": {
+          "200": {
+            "description": "Successfully logged in!"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Log out from Auth0",
+        "description": "",
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "Successfully logged out!"
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "tags": ["team"],
+        "summary": "Get all of the teams that the user is a part of",
+        "description": "",
+        "operationId": "getTeams",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status value"
+          }
+        }
+      },
+      "post": {
+        "tags": ["team"],
+        "summary": "Create a new team",
+        "description": "",
+        "operationId": "addTeam",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Team object to be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Team"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Team successfully added"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/teams/{teamId}": {
+      "get": {
+        "tags": ["team"],
+        "summary": "Find team by ID",
+        "description": "",
+        "operationId": "getTeamById",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "The team ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Team"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["team"],
+        "summary": "Add a user to an existing team",
+        "description": "",
+        "operationId": "updateTeam",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "The team ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Email of the user to add to the team",
+            "required": true,
+            "schema": {
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Team updated successfully"
+          },
+          "400": {
+            "description": "Invalid ID or email supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["team"],
+        "summary": "Remove yourself from a team",
+        "description": "By using this endpoint, you will be removed from the specified team, but other members of the team will not be removed. If you are the last user left in the team when you leave, the team will be deleted.",
+        "operationId": "removeTeam",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "The id of the team you are leaving",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully removed from team"
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        }
+      }
+    },
+    "/projects": {
+      "get": {
+        "tags": ["project"],
+        "summary": "Get all of the projects that the user is involved in",
+        "description": "",
+        "operationId": "getProjects",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Project"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status value"
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/projects": {
+      "post": {
+        "tags": ["project"],
+        "summary": "Add a project to a team",
+        "description": "",
+        "operationId": "addProject",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "The id of the team you are adding a project to",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Project object to be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Project successfully added"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}": {
+      "get": {
+        "tags": ["project"],
+        "summary": "Find project by ID",
+        "description": "",
+        "operationId": "getProjectById",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "The project ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["project"],
+        "summary": "Update an existing project",
+        "description": "",
+        "operationId": "updateProject",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "The project ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Project object to update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Project updated successfully"
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["project"],
+        "summary": "Delete a project",
+        "description": "",
+        "operationId": "deleteProject",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "The id of the project to delete",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted project"
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/tasks": {
+      "get": {
+        "tags": ["task"],
+        "summary": "Get the tasks associated with a project by ID",
+        "description": "",
+        "operationId": "getProjectTasksById",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "The project ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Task"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["task"],
+        "summary": "Add a new task to a project",
+        "description": "",
+        "operationId": "addTask",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "The project ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Project object to be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Project successfully added"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/tasks/{taskId}": {
+      "get": {
+        "tags": ["task"],
+        "summary": "Find task by ID",
+        "description": "",
+        "operationId": "getTaskById",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "The task ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["task"],
+        "summary": "Update an existing task",
+        "description": "",
+        "operationId": "updateTask",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "The task ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Task object to update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Task updated successfully"
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/tasks/{taskId}": {
+      "delete": {
+        "tags": ["task"],
+        "summary": "Delete a task from a project",
+        "description": "",
+        "operationId": "deleteTask",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "The id of the project to delete the task from",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "The id of the task to delete",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted task"
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project or task not found"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Team": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "projects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Project": {
+      "type": "object",
+      "required": ["title", "description"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Task": {
+      "type": "object",
+      "required": ["title", "description", "dueDate", "completed"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
