@@ -8,6 +8,8 @@ routes.get("/:id", teamController.retrieveOne);
 
 routes.post("/");
 
+routes.post("/:teamId/projects", teamController.addProjectToTeam);
+
 routes.put("/:id", teamController.updateTeam);
 
 routes.delete("/:id");
