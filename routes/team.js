@@ -1,14 +1,15 @@
-const express = require('express')
-const routes = express.Router()
+const express = require("express");
+const routes = express.Router();
+const teamController = require("../controllers/team");
 
-routes.get('/')
+routes.get("/", teamController.retrieveAll);
 
-routes.get('/:id')
+routes.get("/:id", teamController.retrieveOne);
 
-routes.post('/')
+routes.post("/");
 
-routes.put('/:id')
+routes.put("/:id", teamController.updateTeam);
 
-routes.delete('/:id')
+routes.delete("/:id");
 
-module.exports = routes
+module.exports = routes;

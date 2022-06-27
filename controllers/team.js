@@ -1,13 +1,13 @@
-const Team = require('../models/team')
+const Team = require("../models/team");
 
-app.post('/', async (req, res) => {
-  const newTeam = await Team.create({
-    name: 'Team 1',
-    members: [],
-    projects: [],
-  })
-  res.status(201).json({ team: newTeam })
-})
+// app.post("/", async (req, res) => {
+//   const newTeam = await Team.create({
+//     name: "Team 1",
+//     members: [],
+//     projects: [],
+//   });
+//   res.status(201).json({ team: newTeam });
+// });
 
 // app.put('/', async (req, res) => {
 //   // const updateTeam = await Team.findOneAndUpdate()
@@ -22,18 +22,37 @@ app.post('/', async (req, res) => {
 //   )
 // })
 
-const retrieveAll = () =>
-  Team.find((err, result) => {
-    if (err) return res.status(500).send(err)
-    return res.status(200).send(result)
-  })
+exports.retrieveAll = (req, res) => {
+  Team.find()
+    .then((teams) => {
+      res.status(200).send(teams);
+    })
+    .catch((err) => {
+      return res.status(500).send(err);
+    });
+};
 
-const retrieveOne = (req, res) => {
-  return Team.findById(i, (err, result) => {
-    if (err) return res.status(500).send(err)
-    return res.status(200).send(result)
-  })
-}
+exports.retrieveOne = (req, res) => {
+  Team.findById(req.params.ObjectId)
+    .then((team) => {
+      res.status(200).send(team);
+    })
+    .catch((err) => {
+      return res.status(500).send(err);
+    });
+};
+
+exports.updateTeam = (req, res) => {
+  Team.findByIdAndUpdate(
+    req.params.ObjectId,
+    req.body,
+    { new: true },
+    (err, result) => {
+      if (err) return res.status(500).send(err);
+      return res.status(200).send(result);
+    }
+  );
+};
 
 const addMember = (req) =>
   Team.findByIdAndUpdate(
@@ -41,18 +60,18 @@ const addMember = (req) =>
     req.body,
     { new: true },
     (err, result) => {
-      if (err) return res.status(500).send(err)
-      return res.status(200).send(result)
+      if (err) return res.status(500).send(err);
+      return res.status(200).send(result);
     }
-  )
+  );
 
-const deleteMember = Team.findByIdAndRemove(
-  req.params.ObjectId,
-  (err, result) => {
-    if (err) return res.status(500).send(err)
-    return res.status(200).send(result)
-  }
-)
+// const deleteMember = Team.findByIdAndRemove(
+//   req.params.ObjectId,
+//   (err, result) => {
+//     if (err) return res.status(500).send(err);
+//     return res.status(200).send(result);
+//   }
+// );
 
 // app.get('/', async (req, res) => {
 //   Team.find((err, result) => {
