@@ -35,7 +35,7 @@ exports.retrieveAll = async (req, res) => {
 
 exports.retrieveOne = async (req, res) => {
   try {
-    const team = await Team.findById(req.params.ObjectId);
+    const team = await Team.findById(req.params.id);
     console.log(team);
     res.status(200).send(team);
   } catch (err) {
@@ -44,9 +44,21 @@ exports.retrieveOne = async (req, res) => {
 };
 
 exports.updateTeam = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(422).send({ message: "Missing Email" });
+  }
+
+  const userId = getIdFromEmail(req.body.email)
+  if (!userId){
+    return res.status(400).json()
+  }
+
   Team.findByIdAndUpdate(
-    req.params.ObjectId,
-    req.body,
+    req.params.id,
+    {$push:{members: userId}}
+    // req.body.email,
     { new: true },
     (err, result) => {
       if (err) return res.status(500).send(err);
