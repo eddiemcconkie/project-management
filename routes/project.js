@@ -1,17 +1,12 @@
-const express = require("express");
-const routes = express.Router();
-const projectController = require("../controllers/project");
+const express = require('express')
+const routes = express.Router()
+const projectController = require('../controllers/project')
+const { hasAccess } = require('../middleware/hasAccess')
 
-routes.get("/", projectController.retrieveAll);
+routes.get('/', projectController.retrieveAll)
+routes.get('/:projectId', hasAccess, projectController.retrieveOne)
+routes.get('/:projectId/tasks', hasAccess)
+routes.put('/:projectId', hasAccess, projectController.updateProject)
+routes.delete('/:projectId', hasAccess)
 
-routes.get("/:id", projectController.retriveOne);
-
-routes.get("/:id/tasks");
-
-routes.post("/");
-
-routes.put("/:id", projectController.updateProject);
-
-routes.delete("/:id");
-
-module.exports = routes;
+module.exports = routes

@@ -493,9 +493,7 @@
             "description": "Task not found"
           }
         }
-      }
-    },
-    "/projects/{projectId}/tasks/{taskId}": {
+      },
       "delete": {
         "tags": ["task"],
         "summary": "Delete a task from a project",
@@ -503,13 +501,6 @@
         "operationId": "deleteTask",
         "produces": ["application/json"],
         "parameters": [
-          {
-            "name": "projectId",
-            "in": "path",
-            "description": "The id of the project to delete the task from",
-            "required": true,
-            "type": "string"
-          },
           {
             "name": "taskId",
             "in": "path",
