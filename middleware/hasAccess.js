@@ -9,7 +9,7 @@ const Project = require('../models/project')
  * @type {import('express').RequestHandler}
  */
 exports.hasAccess = async (req, res, next) => {
-  const { teamId, projectId, taskId } = req.params
+  let { teamId, projectId, taskId } = req.params
 
   const user = await getUser(req)
 
