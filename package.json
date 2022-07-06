@@ -20,7 +20,9 @@
     "swagger-ui-express": "^4.4.0"
   },
   "devDependencies": {
+    "@types/jest": "^28.1.4",
     "jest": "^28.1.2",
+    "mockingoose": "^2.15.2",
     "nodemon": "^2.0.16"
   }
 }
