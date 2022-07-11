@@ -3,7 +3,7 @@ const Task = require("../models/task");
 
 exports.retrieveTask = async (req, res) => {
   try {
-    const task = await Task.findById(req.params.taskId);
+    const task = await Task.findById(req.params.taskId).lean();
     // console.log(task)
     return res.status(200).json(task);
   } catch (err) {
@@ -26,7 +26,7 @@ exports.updateTask = async (req, res) => {
       title: req.body.title,
       description: req.body.description,
       dueDate: req.body.dueDate,
-    });
+    }).lean();
 
     return res.status(204).json({
       message: "Task Updated Successfully",

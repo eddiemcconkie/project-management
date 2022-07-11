@@ -4,7 +4,7 @@ const Task = require("../models/task");
 
 exports.retrieveAll = async (req, res) => {
   try {
-    const projects = await Project.find();
+    const projects = await Project.find().lean();
     // console.log(projects)
     return res.status(200).json(projects);
   } catch (err) {
@@ -14,7 +14,7 @@ exports.retrieveAll = async (req, res) => {
 
 exports.retrieveOne = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.projectId);
+    const project = await Project.findById(req.params.projectId).lean();
     // console.log(project)
     return res.status(200).json(project);
   } catch (err) {
@@ -36,7 +36,7 @@ exports.updateProject = async (req, res) => {
     const project = await Project.findByIdAndUpdate(projectId, {
       title: req.body.title,
       description: req.body.description,
-    });
+    }).lean();
 
     return res.status(204).json({
       message: "Project Updated Successfully",
@@ -49,9 +49,9 @@ exports.updateProject = async (req, res) => {
 
 exports.getProjectTasks = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.projectId).populate(
-      "tasks"
-    );
+    const project = await Project.findById(req.params.projectId)
+      .populate("tasks")
+      .lean();
     return res.status(200).json(project.tasks);
   } catch (err) {
     return res.status(500).json(err);
