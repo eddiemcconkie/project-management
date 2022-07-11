@@ -3,6 +3,8 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const { auth, requiresAuth } = require('express-openid-connect')
+const jwt = require('express-jwt')
+const jwks = require('jwks-rsa')
 const swaggerUi = require('swagger-ui-express')
 
 const app = express()
@@ -16,6 +18,7 @@ const db = mongoose.connection
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 // Auth0
+/** @type {import('express-openid-connect').ConfigParams} */
 const config = {
   authRequired: false,
   auth0Logout: true,
@@ -24,10 +27,23 @@ const config = {
   clientID: process.env.CLIENT_ID,
   issuerBaseURL: process.env.ISSUER_BASE_URL,
   authRequired: false,
+  attemptSilentLogin: true,
 }
 
 // auth router attaches /login, /logout, and /callback routes to the baseURL
 app.use(auth(config))
+
+var jwtCheck = jwt({
+  secret: jwks.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: 'https://dev-dho71l0b.us.auth0.com/.well-known/jwks.json',
+  }),
+  audience: 'https://project-management',
+  issuer: 'https://dev-dho71l0b.us.auth0.com/',
+  algorithms: ['RS256'],
+})
 
 // req.isAuthenticated is provided from the auth router
 app.get('/', (req, res) => {
@@ -60,7 +76,8 @@ app.use(
   )
 )
 
-app.use('/', requiresAuth(), require('./routes'))
+// app.use('/', requiresAuth(), require('./routes'))
+app.use('/', jwtCheck, require('./routes'))
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
