@@ -11,8 +11,8 @@ exports.retrieveAll = async (req, res) => {
 
     const teams = await Team.find({
       members: { $elemMatch: { $eq: user._id } },
-    }).populate('projects')
-    return res.status(200).json()
+    })
+    return res.status(200).json(teams)
   } catch (err) {
     return res.status(500).json(err)
   }

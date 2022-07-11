@@ -1,7 +1,9 @@
-const { formatId } = require('../lib/helpers')
+const { formatId, getUser } = require('../lib/helpers')
+const Team = require('../models/team')
 const Project = require('../models/project')
 const Task = require('../models/task')
 
+/** @type {RequestHandler} */
 exports.retrieveAll = async (req, res) => {
   try {
     const user = await getUser(req)
