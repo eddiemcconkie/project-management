@@ -20,7 +20,6 @@ exports.retrieveOne = async (req, res) => {
   console.log(req.params.teamId);
   try {
     const team = await Team.findById(req.params.teamId).lean();
-    // console.log(team)
     return res.status(200).json(team);
   } catch (err) {
     return res.status(500).json(err);
