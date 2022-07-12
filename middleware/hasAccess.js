@@ -27,7 +27,6 @@ exports.hasAccess = async (req, res, next) => {
       const team = await Team.findOne({
         projects: { $elemMatch: { $eq: projectId } },
       }).populate('members', 'email')
-      console.log('Team: ' + team)
       if (team.members.findIndex((u) => u.email === user.email) < 0) {
         throw new Error()
       }

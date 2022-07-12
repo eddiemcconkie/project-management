@@ -82,3 +82,52 @@ exports.addProjectToTeam = async (req, res) => {
     return res.status(500).json({ message: 'Could not add project to team' })
   }
 }
+
+/** @type {RequestHandler} */
+exports.createTeam = async (req, res) => {
+  if (!req.body.name) {
+    return res
+      .status(401)
+      .json({ message: 'Please provide a name for the team' })
+  }
+
+  try {
+    const user = await getUser(req)
+    const team = await Team.create({
+      name: req.body.name,
+      members: [user._id],
+      projects: [],
+    })
+    console.log(team)
+    return res.status(201).json(formatId(team.toObject()))
+  } catch (error) {
+    return res.status(500).json({ message: 'Could not create team' })
+  }
+}
+
+/** @type {RequestHandler} */
+exports.leaveTeam = async (req, res) => {
+  try {
+    const user = await getUser(req)
+
+    // Pull the user from the team
+    const updatedTeam = await Team.findByIdAndUpdate(
+      req.params.teamId,
+      { $pull: { members: user._id } },
+      { new: true }
+    ).lean()
+
+    // If the user was the last to be removed, delete the team
+    if (updatedTeam.members.length == 0) {
+      await Team.findByIdAndDelete(req.params.teamId)
+      return res.status(204).json({ message: 'Team deleted' })
+    }
+
+    // Otherwise, return as normal
+    return res
+      .status(204)
+      .json({ message: 'You have been removed from the team' })
+  } catch (error) {
+    return res.status(500).json({ message: 'Could not remove you from team' })
+  }
+}
