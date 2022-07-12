@@ -18,7 +18,7 @@ exports.updateTask = async (req, res) => {
   if (!req.body?.title || !req.body?.description || !req.body?.dueDate) {
     return res.status(401).json({
       message:
-        'Invalid Project format. Please provide a title, a desription, and a due date.',
+        'Invalid Project format. Please provide a title, a description, and a due date.',
     })
   }
 
@@ -42,10 +42,13 @@ exports.deleteTask = async (req, res) => {
   try {
     const taskId = req.params.taskId
 
+    // Remove the task from its project
     await Project.findOneAndUpdate(
       { tasks: { $elemMatch: { $eq: taskId } } },
       { $pull: { tasks: taskId } }
     )
+
+    // Delete the task
     await Task.findByIdAndDelete(taskId)
     return res.status(204).json({ message: 'Task deleted successfully' })
   } catch (error) {
