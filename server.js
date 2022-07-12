@@ -33,8 +33,18 @@ app.use(auth(config))
 
 // req.isAuthenticated is provided from the auth router
 app.get('/', (req, res) => {
-  console.log(req.oidc.user)
-  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out')
+  res.send(
+    (req.oidc.isAuthenticated()
+      ? `<h2>Logged in</h2>
+         <a href="/logout">Log out</a>
+         <br />
+         <a href="/api-docs">API Documentation</a>
+         <h3>${req.oidc.user?.name}</h3>
+         <img src="${req.oidc.user?.picture}" />`
+      : `<h2>Logged out</h2>
+         <a href="/login">Log in</a>`) +
+      `<style> :root { font-family: system-ui; } </style>`
+  )
 })
 
 const port = process.env.PORT || 8080
@@ -62,8 +72,7 @@ app.use(
   )
 )
 
-// app.use('/', requiresAuth(), require('./routes'))
-app.use('/', require('./routes'))
+app.use('/', requiresAuth(), require('./routes'))
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
