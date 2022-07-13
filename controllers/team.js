@@ -34,7 +34,7 @@ exports.updateTeam = async (req, res) => {
     const { email } = req.body
 
     if (!email) {
-      return res.status(422).json({ message: 'Missing Email' })
+      return res.status(400).json({ message: 'Missing Email' })
     }
 
     const userId = await getIdFromEmail(req.body.email)
@@ -62,7 +62,7 @@ exports.addProjectToTeam = async (req, res) => {
 
   // Validate the project data
   if (!req.body?.title || !req.body?.description) {
-    return res.status(401).json({
+    return res.status(400).json({
       message: 'Invalid Project format. Please provide a title and description',
     })
   }
@@ -94,7 +94,7 @@ exports.addProjectToTeam = async (req, res) => {
 exports.createTeam = async (req, res) => {
   if (!req.body.name) {
     return res
-      .status(401)
+      .status(400)
       .json({ message: 'Please provide a name for the team' })
   }
 

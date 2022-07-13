@@ -20,7 +20,6 @@ exports.retrieveAll = async (req, res) => {
 exports.retrieveOne = async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId).lean()
-    // console.log(project)
     return res.status(200).json(project)
   } catch (err) {
     return res.status(500).json(err)
@@ -31,7 +30,7 @@ exports.updateProject = async (req, res) => {
   const { projectId } = req.params
 
   if (!req.body?.title || !req.body?.description) {
-    return res.status(401).json({
+    return res.status(400).json({
       message:
         'Invalid Project format. Please provide a title and description.',
     })
@@ -39,13 +38,12 @@ exports.updateProject = async (req, res) => {
 
   try {
     const project = await Project.findByIdAndUpdate(projectId, {
-      title: req.body.title,
-      description: req.body.description,
+      $set: { title: req.body.title, description: req.body.description },
     }).lean()
 
     return res.status(204).json({
       message: 'Project Updated Successfully',
-      project: formatId(project.toObject()),
+      project: formatId(project),
     })
   } catch (err) {
     return res.status(500).json({ message: 'Could not update the project' })
@@ -66,7 +64,7 @@ exports.getProjectTasks = async (req, res) => {
 exports.addTaskToProject = async (req, res) => {
   if (!req.body.title || !req.body.description) {
     return res
-      .status(401)
+      .status(400)
       .json({ message: 'Invalid format. Please provide title and description' })
   }
 

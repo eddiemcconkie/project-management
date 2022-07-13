@@ -15,8 +15,8 @@ exports.retrieveTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
   const { taskId } = req.params
 
-  if (!req.body?.title || !req.body?.description || !req.body?.dueDate) {
-    return res.status(401).json({
+  if (!req.body?.completed) {
+    return res.status(400).json({
       message:
         'Invalid Project format. Please provide a title, a description, and a due date.',
     })
@@ -24,15 +24,16 @@ exports.updateTask = async (req, res) => {
 
   try {
     const task = await Task.findByIdAndUpdate(taskId, {
-      title: req.body.title,
-      description: req.body.description,
-      dueDate: req.body.dueDate,
+      $set: {
+        completed: req.body.completed,
+      },
     }).lean()
 
-    return res.status(204).json({
-      message: 'Task Updated Successfully',
-      task: formatId(task.toObject()),
-    })
+    // return res.status(204).json({
+    //   message: 'Task Updated Successfully',
+    //   task: formatId(task),
+    // })
+    return res.status(204).json(formatId(task))
   } catch (err) {
     return res.status(500).json({ message: 'Could not update the task' })
   }
