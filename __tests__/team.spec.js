@@ -7,11 +7,12 @@ const Team = require('../models/team')
 const Project = require('../models/project')
 
 const { retrieveOne, addProjectToTeam } = require('../controllers/team')
+const TestResponse = require('../lib/test-response')
 
 jest.setTimeout(60000)
 
-describe('Retrieve one', () => {
-  test('Get team', async () => {
+describe('Team routes', () => {
+  test('Get one team', async () => {
     const _doc = {
       _id: ObjectId('58c767386f1d58ebc37af1eb'),
       members: [],
@@ -23,17 +24,7 @@ describe('Retrieve one', () => {
     const req = {
       params: { teamId: '58c767386f1d58ebc37af1eb' },
     }
-    const res = {
-      statusCode: 0,
-      status(code) {
-        this.statusCode = code
-        return this
-      },
-      data: {},
-      json(data) {
-        this.data = data
-      },
-    }
+    const res = new TestResponse()
 
     await retrieveOne(req, res)
     expect(res.data).toEqual(_doc)
