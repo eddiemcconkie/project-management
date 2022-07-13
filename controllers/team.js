@@ -20,7 +20,6 @@ exports.retrieveAll = async (req, res) => {
 
 /** @type {RequestHandler} */
 exports.retrieveOne = async (req, res) => {
-  console.log(req.params.teamId)
   try {
     const team = await Team.findById(req.params.teamId).lean()
     return res.status(200).json(team)
@@ -31,26 +30,30 @@ exports.retrieveOne = async (req, res) => {
 
 /** @type {RequestHandler} */
 exports.updateTeam = async (req, res) => {
-  const { email } = req.body
+  try {
+    const { email } = req.body
 
-  if (!email) {
-    return res.status(422).json({ message: 'Missing Email' })
-  }
-
-  const userId = await getIdFromEmail(req.body.email).lean()
-  if (!userId) {
-    return res.status(400).json()
-  }
-
-  Team.findByIdAndUpdate(
-    req.params.teamId,
-    { $push: { members: userId } },
-    { new: true },
-    (err, result) => {
-      if (err) return res.status(500).json(err)
-      return res.status(200).json(result)
+    if (!email) {
+      return res.status(422).json({ message: 'Missing Email' })
     }
-  )
+
+    const userId = await getIdFromEmail(req.body.email)
+    if (!userId) {
+      return res.status(400).json()
+    }
+
+    Team.findByIdAndUpdate(
+      req.params.teamId,
+      { $push: { members: userId } },
+      { new: true },
+      (err, result) => {
+        if (err) return res.status(500).json(err)
+        return res.status(200).json(result)
+      }
+    )
+  } catch (error) {
+    return res.status(500).json({ message: 'Could not add user to team' })
+  }
 }
 
 /** @type {RequestHandler} */
@@ -71,9 +74,13 @@ exports.addProjectToTeam = async (req, res) => {
     })
 
     // If the project was created successfully, add the project ID to the team
-    await Team.findByIdAndUpdate(teamId, {
-      $push: { projects: project._id },
-    })
+    // await Team.findByIdAndUpdate(teamId, {
+    await Team.findOneAndUpdate(
+      { _id: teamId },
+      {
+        $push: { projects: project._id },
+      }
+    )
     return res.status(201).json({
       message: 'Project added!',
       project: formatId(project.toObject()),
