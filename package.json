@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/jest": "^28.1.4",
     "jest": "^28.1.2",
+    "jest-mongoose-mock": "^1.2.0",
     "mockingoose": "^2.15.2",
     "nodemon": "^2.0.16"
   }

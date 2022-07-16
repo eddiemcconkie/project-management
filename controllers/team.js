@@ -1,6 +1,6 @@
 const Team = require('../models/team')
 const Project = require('../models/project')
-const { getIdFromEmail, formatId, getUser } = require('../lib/helpers')
+const { getIdFromEmail, getUser } = require('../lib/helpers')
 
 /** @typedef {import('express').RequestHandler} RequestHandler */
 
@@ -21,8 +21,8 @@ exports.retrieveAll = async (req, res) => {
 /** @type {RequestHandler} */
 exports.retrieveOne = async (req, res) => {
   try {
-    const team = await Team.findById(req.params.teamId).lean()
-    return res.status(200).json(team)
+    const team = await Team.findById(req.params.teamId)
+    return res.status(200).json(team.toObject())
   } catch (err) {
     return res.status(500).json(err)
   }
@@ -74,17 +74,8 @@ exports.addProjectToTeam = async (req, res) => {
     })
 
     // If the project was created successfully, add the project ID to the team
-    // await Team.findByIdAndUpdate(teamId, {
-    await Team.findOneAndUpdate(
-      { _id: teamId },
-      {
-        $push: { projects: project._id },
-      }
-    )
-    return res.status(201).json({
-      message: 'Project added!',
-      project: formatId(project.toObject()),
-    })
+    await Team.findByIdAndUpdate(teamId, { $push: { projects: project._id } })
+    return res.status(201).json(project.toObject())
   } catch (error) {
     return res.status(500).json({ message: 'Could not add project to team' })
   }
@@ -105,8 +96,7 @@ exports.createTeam = async (req, res) => {
       members: [user._id],
       projects: [],
     })
-    console.log(team)
-    return res.status(201).json(formatId(team.toObject()))
+    return res.status(201).json(team.toObject())
   } catch (error) {
     return res.status(500).json({ message: 'Could not create team' })
   }
