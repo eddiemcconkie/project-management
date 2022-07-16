@@ -43,7 +43,7 @@ exports.updateProject = async (req, res) => {
 
     return res.status(204).json({
       message: "Project Updated Successfully",
-      project: project,
+      project: formatId(project),
     });
   } catch (err) {
     return res.status(500).json({ message: "Could not update the project" });

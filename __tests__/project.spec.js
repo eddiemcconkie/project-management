@@ -5,12 +5,13 @@ const {
 const MockModel = require("jest-mongoose-mock");
 jest.mock("../models/project", () => new MockModel());
 jest.mock("../models/task", () => new MockModel());
+jest.mock("../models/team", () => new MockModel());
 const Project = require("../models/project");
 const Task = require("../models/task");
+const Team = require("../models/team");
 const projectController = require("../controllers/project");
 const TestResponse = require("../lib/test-response");
 const TestDocument = require("../lib/test-document");
-const createdDate = new Date("2022-06-29T14:42:36.904+00:00");
 
 describe("Project Routes", () => {
   let res;
@@ -25,7 +26,7 @@ describe("Project Routes", () => {
       title: "Project 1",
       description: "First real project",
       tasks: [],
-      createdAt: createdDate,
+      createdAt: "2022-06-29T14:42:36.904+00:00",
     });
     Project.findById.mockReturnValue(projectDoc);
 
@@ -96,5 +97,25 @@ describe("Project Routes", () => {
     await projectController.updateProject(req, res);
     expect(res.statusCode).toBe(204);
     expect(Project.findByIdAndUpdate.mock.calls.length).toBe(1);
+  });
+
+  test("Delete a project", async () => {
+    const projectDoc = new TestDocument({
+      _id: ObjectId("62d19dc6abcd9783e2a2befd"),
+      title: "Project 6",
+      description: "The Best Project",
+      tasks: [],
+      createdAt: "2022-07-15T17:03:02.272+00:00",
+    });
+    Project.findByIdAndDelete.mockReturnValue(projectDoc);
+
+    const req = {
+      params: {
+        projectId: "62d19dc6abcd9783e2a2befd",
+      },
+    };
+    await projectController.deleteProject(req, res);
+    expect(res.statusCode).toBe(204);
+    expect(Project.findByIdAndDelete.mock.calls.length).toBe(1);
   });
 });

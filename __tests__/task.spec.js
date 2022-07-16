@@ -1,52 +1,89 @@
-const mockingoose = require("mockingoose");
-const Task = require("../models/task");
 const {
   Types: { ObjectId },
 } = require("mongoose");
 
-const { retrieveTask } = require("../controllers/task");
-const TestResponse = require("../lib/test-response");
-const dueDate = new Date("2022-07-21T00:00:00.000+00:00");
-const createdDate = new Date("2022-07-15T17:08:14.354+00:00");
 const MockModel = require("jest-mongoose-mock");
 jest.mock("../models/task", () => new MockModel());
+const Task = require("../models/task");
 const taskController = require("../controllers/task");
+const TestResponse = require("../lib/test-response");
+const TestDocument = require("../lib/test-document");
 
 describe("Task routes", () => {
-  test("Get one task", async () => {
-    const _doc = {
-      _id: ObjectId("62d19efeabcd9783e2a2bf03"),
-      title: "Homework",
-      description: "Web Design",
-      dueDate: dueDate,
-      completed: false,
-      createdAt: createdDate,
-    };
+  let res;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    res = new TestResponse();
+  });
 
-    mockingoose(Task).toReturn(_doc, "findOne");
+  test("Get one task", async () => {
+    const taskDoc = new TestDocument({
+      _id: ObjectId("62d23253a71b4b3f21abfc34"),
+      title: "Awesome Task",
+      description: "Awesome Description",
+      dueDate: "2022-07-21T00:00:00.000+00:00",
+      completed: false,
+      createdAt: "2022-07-16T03:36:51.508+00:00",
+    });
+    Task.findById.mockReturnValue(taskDoc);
 
     const req = {
-      params: { taskId: "62d19efeabcd9783e2a2bf03" },
+      params: { taskId: "62d23253a71b4b3f21abfc34" },
     };
 
     const res = new TestResponse();
 
-    await retrieveTask(req, res);
-    expect(res.statusCode).toEqual(200);
-    expect(res.data).toEqual(_doc);
+    await taskController.retrieveTask(req, res);
+    expect(res.statusCode).toBe(200);
+    expect(res.data).toEqual(taskDoc);
+    expect(Task.findById.mock.calls.length).toBe(1);
   });
-});
 
-describe("deleteTask", () => {
-  let req, res;
-  beforeEach(() => {
-    jest.clearAllMocks();
-    req = { body: {} };
-    res = { json: jest.fn() };
+  test("Update Task", async () => {
+    const taskDoc = new TestDocument({
+      _id: ObjectId("62d23253a71b4b3f21abfc34"),
+      title: "Awesome Task",
+      description: "Awesome Description",
+      dueDate: "2022-07-21T00:00:00.000+00:00",
+      completed: false,
+      createdAt: "2022-07-16T03:36:51.508+00:00",
+    });
+    Task.findByIdAndUpdate.mockReturnValue(taskDoc);
+
+    const req = {
+      params: {
+        taskId: "62d23253a71b4b3f21abfc34",
+      },
+
+      body: {
+        completed: true,
+      },
+    };
+
+    await taskController.updateTask(req, res);
+    expect(res.statusCode).toBe(204);
+    expect(Task.findByIdAndUpdate.mock.calls.length).toBe(1);
   });
-  it("Deletes a tasks", () => {
-    taskController.deleteTask(req, res);
-    expect(Task.delete.mock.calls.length).toBe(1);
-    expect(Task.exec.mock.calls.length).toBe(1);
-  });
+
+  // test("Delete a task", async () => {
+  //   const taskDoc = new TestDocument({
+  //     _id: ObjectId("62d23253a71b4b3f21abfc34"),
+  //     title: "Awesome Task",
+  //     description: "Awesome Description",
+  //     dueDate: "2022-07-21T00:00:00.000+00:00",
+  //     completed: false,
+  //     createdAt: "2022-07-16T03:36:51.508+00:00",
+  //   });
+  //   Task.findByIdAndDelete.mockReturnValue(taskDoc);
+
+  //   const req = {
+  //     params: {
+  //       taskId: "62d23253a71b4b3f21abfc34",
+  //     },
+  //   };
+
+  //   await taskController.deleteTask(req, res);
+  //   expect(res.statusCode).toBe(204);
+  //   expect(Task.findByIdAndDelete.mock.calls.length).toBe(1);
+  // });
 });
