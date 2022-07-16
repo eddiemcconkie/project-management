@@ -1,121 +1,173 @@
 const {
   Types: { ObjectId },
-} = require("mongoose");
+} = require('mongoose')
 
-const MockModel = require("jest-mongoose-mock");
-jest.mock("../models/project", () => new MockModel());
-jest.mock("../models/task", () => new MockModel());
-jest.mock("../models/team", () => new MockModel());
-const Project = require("../models/project");
-const Task = require("../models/task");
-const Team = require("../models/team");
-const projectController = require("../controllers/project");
-const TestResponse = require("../lib/test-response");
-const TestDocument = require("../lib/test-document");
+const MockModel = require('jest-mongoose-mock')
+jest.mock('../models/project', () => new MockModel())
+jest.mock('../models/task', () => new MockModel())
+jest.mock('../models/team', () => new MockModel())
+const Project = require('../models/project')
+const Task = require('../models/task')
+const Team = require('../models/team')
+const projectController = require('../controllers/project')
+const TestResponse = require('../lib/test-response')
+const TestDocument = require('../lib/test-document')
 
-describe("Project Routes", () => {
-  let res;
+jest.mock('../lib/helpers', () => ({
+  getUser: jest.fn().mockResolvedValue({ _id: 'id' }),
+}))
+
+describe('Project Routes', () => {
+  let res
   beforeEach(() => {
-    jest.clearAllMocks();
-    res = new TestResponse();
-  });
+    jest.clearAllMocks()
+    res = new TestResponse()
+  })
 
-  test("Get one project", async () => {
+  test('Get all projects', async () => {
+    const docs = {
+      populate() {
+        return this
+      },
+      map() {
+        return this
+      },
+      flat() {
+        return this
+      },
+    }
+    // setup
+    Team.find.mockReturnValue(docs)
+
+    const req = {}
+
+    // exercise
+    await projectController.retrieveAll(req, res)
+
+    // verify
+    expect(res.statusCode).toBe(200)
+  })
+
+  test('Get one project', async () => {
     const projectDoc = new TestDocument({
-      _id: ObjectId("62bc64dcff745674c4436493"),
-      title: "Project 1",
-      description: "First real project",
+      _id: ObjectId('62bc64dcff745674c4436493'),
+      title: 'Project 1',
+      description: 'First real project',
       tasks: [],
-      createdAt: "2022-06-29T14:42:36.904+00:00",
-    });
-    Project.findById.mockReturnValue(projectDoc);
+      createdAt: '2022-06-29T14:42:36.904+00:00',
+    })
+    Project.findById.mockReturnValue(projectDoc)
 
     const req = {
-      params: { projectId: "62bc64dcff745674c4436493" },
-    };
+      params: { projectId: '62bc64dcff745674c4436493' },
+    }
 
-    const res = new TestResponse();
+    const res = new TestResponse()
 
-    await projectController.retrieveOne(req, res);
+    await projectController.retrieveOne(req, res)
 
-    expect(res.statusCode).toBe(200);
-    expect(res.data).toEqual(projectDoc);
-    expect(Project.findById.mock.calls.length).toBe(1);
-  });
+    expect(res.statusCode).toBe(200)
+    expect(res.data).toEqual(projectDoc)
+    expect(Project.findById.mock.calls.length).toBe(1)
+  })
 
-  test("Add task to project", async () => {
+  test('Add task to project', async () => {
     const taskDoc = new TestDocument({
-      _id: ObjectId("62d23253a71b4b3f21abfc34"),
-      title: "Awesome Task",
-      description: "Awesome Description",
-      dueDate: "2022-07-21T00:00:00.000+00:00",
+      _id: ObjectId('62d23253a71b4b3f21abfc34'),
+      title: 'Awesome Task',
+      description: 'Awesome Description',
+      dueDate: '2022-07-21T00:00:00.000+00:00',
       completed: false,
-      createdAt: "2022-07-16T03:36:51.508+00:00",
-    });
-    Task.create.mockReturnValue(taskDoc);
+      createdAt: '2022-07-16T03:36:51.508+00:00',
+    })
+    Task.create.mockReturnValue(taskDoc)
 
     const req = {
       params: {
-        projectId: "62bc64dcff745674c4436493",
+        projectId: '62bc64dcff745674c4436493',
       },
       body: {
-        title: "Awesome Task",
-        description: "Awesome Description",
+        title: 'Awesome Task',
+        description: 'Awesome Description',
         completed: false,
       },
-    };
+    }
 
-    await projectController.addTaskToProject(req, res);
+    await projectController.addTaskToProject(req, res)
 
-    expect(res.statusCode).toBe(201);
-    expect(res.data).toEqual(taskDoc);
-    expect(Task.create.mock.calls.length).toBe(1);
-    expect(Project.findByIdAndUpdate.mock.calls.length).toBe(1);
-  });
+    expect(res.statusCode).toBe(201)
+    expect(res.data).toEqual(taskDoc)
+    expect(Task.create.mock.calls.length).toBe(1)
+    expect(Project.findByIdAndUpdate.mock.calls.length).toBe(1)
+  })
 
-  test("Update project", async () => {
+  test('Update project', async () => {
     const projectDoc = new TestDocument({
-      _id: ObjectId("62d19dc6abcd9783e2a2befd"),
-      title: "Project 6",
-      description: "The Best Project",
+      _id: ObjectId('62d19dc6abcd9783e2a2befd'),
+      title: 'Project 6',
+      description: 'The Best Project',
       tasks: [],
-      createdAt: "2022-07-15T17:03:02.272+00:00",
-    });
-    Project.findByIdAndUpdate.mockReturnValue(projectDoc);
+      createdAt: '2022-07-15T17:03:02.272+00:00',
+    })
+    Project.findByIdAndUpdate.mockReturnValue(projectDoc)
 
     const req = {
       params: {
-        projectId: "62d19dc6abcd9783e2a2befd",
+        projectId: '62d19dc6abcd9783e2a2befd',
       },
 
       body: {
-        title: "project 6",
-        description: "the best",
+        title: 'project 6',
+        description: 'the best',
       },
-    };
+    }
 
-    await projectController.updateProject(req, res);
-    expect(res.statusCode).toBe(204);
-    expect(Project.findByIdAndUpdate.mock.calls.length).toBe(1);
-  });
+    await projectController.updateProject(req, res)
+    expect(res.statusCode).toBe(204)
+    expect(Project.findByIdAndUpdate.mock.calls.length).toBe(1)
+  })
 
-  test("Delete a project", async () => {
+  test('Delete a project', async () => {
     const projectDoc = new TestDocument({
-      _id: ObjectId("62d19dc6abcd9783e2a2befd"),
-      title: "Project 6",
-      description: "The Best Project",
+      _id: ObjectId('62d19dc6abcd9783e2a2befd'),
+      title: 'Project 6',
+      description: 'The Best Project',
       tasks: [],
-      createdAt: "2022-07-15T17:03:02.272+00:00",
-    });
-    Project.findByIdAndDelete.mockReturnValue(projectDoc);
+      createdAt: '2022-07-15T17:03:02.272+00:00',
+    })
+    Project.findByIdAndDelete.mockReturnValue(projectDoc)
 
     const req = {
       params: {
-        projectId: "62d19dc6abcd9783e2a2befd",
+        projectId: '62d19dc6abcd9783e2a2befd',
       },
-    };
-    await projectController.deleteProject(req, res);
-    expect(res.statusCode).toBe(204);
-    expect(Project.findByIdAndDelete.mock.calls.length).toBe(1);
-  });
-});
+    }
+    await projectController.deleteProject(req, res)
+    expect(res.statusCode).toBe(204)
+    expect(Project.findByIdAndDelete.mock.calls.length).toBe(1)
+  })
+
+  test('Get project tasks', async () => {
+    // setup
+    const projectDoc = new TestDocument({
+      _id: ObjectId('62d19dc6abcd9783e2a2befd'),
+      title: 'Project 6',
+      description: 'The Best Project',
+      tasks: [],
+      createdAt: '2022-07-15T17:03:02.272+00:00',
+    })
+    Project.findById.mockReturnValue(projectDoc)
+
+    const req = {
+      params: {
+        projectId: '62d19dc6abcd9783e2a2befd',
+      },
+    }
+
+    // exercise
+    await projectController.getProjectTasks(req, res)
+
+    // verify
+    expect(res.statusCode).toBe(200)
+  })
+})
