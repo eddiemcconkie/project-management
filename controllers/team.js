@@ -42,15 +42,12 @@ exports.updateTeam = async (req, res) => {
       return res.status(400).json()
     }
 
-    Team.findByIdAndUpdate(
+    const updatedTeam = await Team.findByIdAndUpdate(
       req.params.teamId,
       { $push: { members: userId } },
-      { new: true },
-      (err, result) => {
-        if (err) return res.status(500).json(err)
-        return res.status(200).json(result)
-      }
+      { new: true }
     )
+    return res.status(204).json(updatedTeam)
   } catch (error) {
     return res.status(500).json({ message: 'Could not add user to team' })
   }
