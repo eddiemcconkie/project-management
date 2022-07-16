@@ -11,16 +11,31 @@ const teamController = require('../controllers/team')
 const TestResponse = require('../lib/test-response')
 const TestDocument = require('../lib/test-document')
 
-const helpers = require('../lib/helpers')
-const getUser = jest.fn(helpers.getUser)
-getUser.mockReturnValue({ _id: 'userid' })
-// jest.setTimeout(60000)
+jest.mock('../lib/helpers', () => ({
+  getUser: jest.fn().mockResolvedValue({ _id: 'id' }),
+  getIdFromEmail: jest.fn().mockResolvedValue('id'),
+}))
 
 describe('Team routes', () => {
   let res
   beforeEach(() => {
     jest.clearAllMocks()
     res = new TestResponse()
+  })
+
+  test('Get all teams', async () => {
+    // setup
+    const teamDocs = []
+    Team.find.mockReturnValue(teamDocs)
+
+    const req = {}
+
+    // exercise
+    await teamController.retrieveAll(req, res)
+
+    // verify
+    expect(res.statusCode).toBe(200)
+    expect(res.data).toEqual(teamDocs)
   })
 
   test('Get one team', async () => {
@@ -44,6 +59,33 @@ describe('Team routes', () => {
     expect(res.statusCode).toBe(200)
     expect(res.data).toEqual(teamDoc)
     expect(Team.findById.mock.calls.length).toBe(1)
+  })
+
+  test('Update team', async () => {
+    // setup
+    const teamDoc = new TestDocument({
+      _id: ObjectId('58c767386f1d58ebc37af1eb'),
+      members: [],
+      projects: [],
+    })
+    Team.findByIdAndUpdate.mockReturnValue(teamDoc)
+
+    const req = {
+      params: {
+        teamId: '62bc6db16471a1628f7c6f56',
+      },
+      body: {
+        email: 'Email',
+      },
+    }
+
+    // exercise
+    await teamController.updateTeam(req, res)
+
+    // verify
+    expect(res.statusCode).toBe(204)
+    expect(res.data).toEqual(teamDoc)
+    expect(Team.findByIdAndUpdate.mock.calls.length).toBe(1)
   })
 
   test('Add project to team', async () => {
@@ -77,6 +119,30 @@ describe('Team routes', () => {
     expect(Team.findByIdAndUpdate.mock.calls.length).toBe(1)
   })
 
+  test('Create team', async () => {
+    // setup
+    const teamDoc = new TestDocument({
+      _id: ObjectId('58c767386f1d58ebc37af1eb'),
+      members: [],
+      projects: [],
+    })
+    Team.create.mockReturnValue(teamDoc)
+
+    const req = {
+      body: {
+        name: 'Name',
+      },
+    }
+
+    // exercise
+    await teamController.createTeam(req, res)
+
+    // verify
+    expect(res.statusCode).toBe(201)
+    expect(res.data).toEqual(teamDoc)
+    expect(Team.create.mock.calls.length).toBe(1)
+  })
+
   test('Leave team', async () => {
     // setup
     const teamDoc = new TestDocument({
@@ -92,13 +158,23 @@ describe('Team routes', () => {
         teamId: '62bc6db16471a1628f7c6f56',
       },
     }
-    // getUser.mockReturnValue({ _id: 'userid' })
 
     // exercise
-    teamController.leaveTeam(req, res)
+    await teamController.leaveTeam(req, res)
 
     // verify
     expect(res.statusCode).toBe(204)
     expect(Team.findByIdAndUpdate.mock.calls.length).toBe(1)
   })
 })
+
+/*
+test('', async () => {
+  // setup
+
+  // exercise
+
+  // verify
+    
+})
+*/
