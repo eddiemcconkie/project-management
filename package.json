@@ -17,6 +17,7 @@
     "express": "^4.18.1",
     "express-jwt": "^7.7.5",
     "express-openid-connect": "^2.7.2",
+    "jest-mongoose-mock": "^1.2.0",
     "jwks-rsa": "^2.1.4",
     "mongoose": "^6.4.0",
     "swagger-ui-express": "^4.4.0"

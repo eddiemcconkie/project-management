@@ -8,6 +8,9 @@ const { retrieveTask } = require("../controllers/task");
 const TestResponse = require("../lib/test-response");
 const dueDate = new Date("2022-07-21T00:00:00.000+00:00");
 const createdDate = new Date("2022-07-15T17:08:14.354+00:00");
+const MockModel = require("jest-mongoose-mock");
+jest.mock("../models/task", () => new MockModel());
+const taskController = require("../controllers/task");
 
 describe("Task routes", () => {
   test("Get one task", async () => {
@@ -31,5 +34,19 @@ describe("Task routes", () => {
     await retrieveTask(req, res);
     expect(res.statusCode).toEqual(200);
     expect(res.data).toEqual(_doc);
+  });
+});
+
+describe("deleteTask", () => {
+  let req, res;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = { body: {} };
+    res = { json: jest.fn() };
+  });
+  it("Deletes a tasks", () => {
+    taskController.deleteTask(req, res);
+    expect(Task.delete.mock.calls.length).toBe(1);
+    expect(Task.exec.mock.calls.length).toBe(1);
   });
 });
